@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Speech.Synthesis;
+using System.Text.RegularExpressions;
 
 
 namespace Image2Speech
@@ -145,9 +146,42 @@ namespace Image2Speech
                 height = 0;
                 hasLeftMouseButtonBeenPressed = false;
 
-                string text = ConvertImageToText();
-                Debug.WriteLine(text);
-                SpeakText(text);
+                string input = ConvertImageToText();
+
+                string result = Regex.Replace(input, @"(\r\n|\n|\r){2,}", "\r\n"); // Replace multiple newlines with a single newline
+
+                result = input.Replace("\r", ",")
+                                     .Replace("\n", ",")
+                                     .Replace("\t", ", ")
+                                     .Replace(".", ", ")
+                                     .Replace(":", ",")
+                                     .Replace("?", ", ")
+                                     .Replace(";", "," )
+                                     .Replace("  ", ",")
+                                     .Replace(",,,", ",")
+                                     .Replace(",,,,", ",")
+                                     .Replace(",,,,,", ",")
+                                     .Replace(",,", ",");
+                                     
+                
+
+                //result = Regex.Replace(result, @",\s*,+", "");
+
+                //// Step 1: Remove duplicate newlines
+                ////string result = Regex.Replace(input, @"(\r\n|\n|\r){2,}", "\r\n"); // Replace multiple newlines with a single newline
+
+                //// Step 2: Replace remaining newlines with spaces
+                //result = Regex.Replace(result, @"(\r\n|\n|\r)", ", "); // Replace all newlines with spaces
+
+                //// Step 3: Replace periods and colons with commas
+                //result = result.Replace(".", ", ")
+                //                .Replace(":", ", ")
+                //                .Replace("?", ", ");
+
+                Console.WriteLine(result);
+
+                Debug.WriteLine(result);
+                SpeakText(result);
                 timer.Start();
             }
 
@@ -176,7 +210,7 @@ namespace Image2Speech
         {
             try
             {
-                License.LicenseKey = "IRONSUITE.INFO.DANIELCARLSON.NET.11806-7EE99788EA-ALGOP6N6A5PH7LKM-WSRAZUKSAYYA-TF7L5MMBKSDS-7LV6MKCRYMEH-AAQTOWSCJQ2U-CBTJGAPK5GYA-H2TIW5-TKYM7YO2N42LUA-DEPLOYMENT.TRIAL-A423OP.TRIAL.EXPIRES.09.MAR.2024";
+                License.LicenseKey = "IRONSUITE.DANIEL.CARLSON.MAIL.COM.14821-86097A0999-B7RFXQ5VVRVVQ2-XFKZT5GU3X2B-CKSVOMWY3G4D-FNGOVO7HHPJ4-MBMTYTBQJ42C-27ZNJOOMBYTZ-5ZKAYS-TDYV6XBEMKWOUA-DEPLOYMENT.TRIAL-JPHMJM.TRIAL.EXPIRES.20.FEB.2025"; 
                 IronTesseract IronOcr = new IronTesseract();
                 var Result = IronOcr.Read("output.jpg");
                 return Result.Text;
